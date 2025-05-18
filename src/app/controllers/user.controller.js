@@ -1,4 +1,5 @@
 import { UserModel } from '../models/user.model.js'
+import 'dotenv/config';
 import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
@@ -44,7 +45,39 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { username, password } = req.body
+        const { email, password } = req.body
+
+        // Verificar si el usuario existe
+        const user = await UserModel.findOneByEmail(email);
+        if (!user) {
+            return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
+        }
+
+        // Verificar la contraseña
+        const validPassword = await bcryptjs.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ ok: false, msg: 'Contraseña incorrecta' });
+        }
+
+        // Generar el token
+        const token = jwt.sign(
+            { uid: user.uid, email: user.email, role_id: user.role_id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+
+        res.json({
+            ok: true,
+            token,
+            user: {
+                uid: user.uid,
+                email: user.email,
+                username: user.username,
+                role_id: user.role_id
+            }
+        });
+
     }catch(error){
         console.log(error)
         return res.status(500).json({ ok: false, msg: "Error creating user", error: error.message })
@@ -73,5 +106,6 @@ const findAll = async (req, res) => {
 
 export const UserController = {
     register,
-    findAll
+    findAll,
+    login
 }

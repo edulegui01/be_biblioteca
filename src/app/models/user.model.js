@@ -1,55 +1,72 @@
 import db from '../config/db.js';
 
 const create = async ({ email, password, username }) => {
-  const query = {
+  try {
+    const query = {
       text: `
       INSERT INTO users (email, password, username)
       VALUES ($1, $2, $3)
       RETURNING email, username, uid, role_id
       `,
       values: [email, password, username]
-  }
+    }
 
-  const { rows } = await db.query(query)
-  return rows[0]
+    const { rows } = await db.query(query)
+    return rows[0]
+  } catch (error) {
+    throw new Error(`Error al crear usuario: ${error.message}`)
+  }
 }
 
 const findOneByEmail = async (email) => {
-  const query = {
+  try {
+    const query = {
       text: `
       SELECT * FROM users
       WHERE EMAIL = $1
       `,
       values: [email]
+    }
+    const { rows } = await db.query(query)
+    return rows[0]
+  } catch (error) {
+    throw new Error(`Error al buscar usuario por email: ${error.message}`)
   }
-  const { rows } = await db.query(query)
-  return rows[0]
 }
 
 const findAll = async () => {
-  const query = {
+  try {
+    const query = {
       text: `
       SELECT * FROM users
       `
+    }
+    const { rows } = await db.query(query)
+    return rows
+  } catch (error) {
+    throw new Error(`Error al obtener todos los usuarios: ${error.message}`)
   }
-  const { rows } = await db.query(query)
-  return rows
 }
 
 const findOneByUid = async (uid) => {
-  const query = {
+  try {
+    const query = {
       text: `
       SELECT * FROM users
       WHERE uid = $1
       `,
       values: [uid]
+    }
+    const { rows } = await db.query(query)
+    return rows[0]
+  } catch (error) {
+    throw new Error(`Error al buscar usuario por uid: ${error.message}`)
   }
-  const { rows } = await db.query(query)
-  return rows[0]
 }
 
 const updateRoleVet = async (uid) => {
-  const query = {
+  try {
+    const query = {
       text: `
       UPDATE users
       SET role_id = 2
@@ -57,9 +74,12 @@ const updateRoleVet = async (uid) => {
       RETURNING *
       `,
       values: [uid]
+    }
+    const { rows } = await db.query(query)
+    return rows[0]
+  } catch (error) {
+    throw new Error(`Error al actualizar rol de veterinario: ${error.message}`)
   }
-  const { rows } = await db.query(query)
-  return rows[0]
 }
 
 export const UserModel = {

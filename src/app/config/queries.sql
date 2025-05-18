@@ -1,6 +1,8 @@
 DROP TABLE IF EXISTS USERS;
 DROP TABLE IF EXISTS ROLES;
 
+-- Habilitar la extensión para UUID
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE ROLES (
     RID SERIAL PRIMARY KEY,
@@ -15,6 +17,35 @@ CREATE TABLE USERS (
 	USERNAME VARCHAR(50) NOT NULL,
     ROLE_ID INT NOT NULL DEFAULT 2,
     FOREIGN KEY (ROLE_ID) REFERENCES ROLES(RID)
+);
+
+
+CREATE TABLE books (
+  id UUID PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  author VARCHAR(100),
+  isbn VARCHAR(20) UNIQUE,
+  qr_code TEXT UNIQUE NOT NULL, -- Este código estará impreso como QR
+  shelf VARCHAR(50),            -- Estantería o ubicación
+  available BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE loans (
+  id UUID PRIMARY KEY,
+  user_uid INT NOT NULL REFERENCES users(uid),
+  loan_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  return_date DATE,
+  status VARCHAR(20) DEFAULT 'pendiente' -- u 'devuelto'
+);
+
+
+CREATE TABLE loan_details (
+  id UUID PRIMARY KEY,
+  loan_id UUID NOT NULL REFERENCES loans(id) ON DELETE CASCADE,
+  book_id UUID NOT NULL REFERENCES books(id),
+  returned BOOLEAN DEFAULT FALSE
 );
 
 INSERT INTO ROLES (NAME) VALUES ('ADMIN');
