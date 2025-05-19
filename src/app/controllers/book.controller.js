@@ -1,5 +1,44 @@
 import { BookModel } from '../models/book.model.js'
 
+/**
+ * @swagger
+ * /api/books:
+ *   post:
+ *     summary: Crear un nuevo libro
+ *     tags: [Books]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - isbn
+ *               - qr_code
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               isbn:
+ *                 type: string
+ *               qr_code:
+ *                 type: string
+ *               shelf:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Libro creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       400:
+ *         description: Campos requeridos faltantes
+ *       409:
+ *         description: ISBN o código QR ya existe
+ */
 const create = async (req, res) => {
     try {
         const { title, author, isbn, qr_code, shelf } = req.body
@@ -50,6 +89,60 @@ const create = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/books:
+ *   get:
+ *     summary: Obtener lista de libros paginada
+ *     tags: [Books]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Número de elementos por página
+ *     responses:
+ *       200:
+ *         description: Lista de libros
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                 msg:
+ *                   type: object
+ *                   properties:
+ *                     books:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Book'
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         total:
+ *                           type: integer
+ *                         page:
+ *                           type: integer
+ *                         limit:
+ *                           type: integer
+ *                         totalPages:
+ *                           type: integer
+ *                         nextPage:
+ *                           type: string
+ *                           nullable: true
+ *                         prevPage:
+ *                           type: string
+ *                           nullable: true
+ */
 const findAll = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -89,6 +182,29 @@ const findAll = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/books/{id}:
+ *   get:
+ *     summary: Obtener un libro por ID
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del libro
+ *     responses:
+ *       200:
+ *         description: Libro encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       404:
+ *         description: Libro no encontrado
+ */
 const findOneById = async (req, res) => {
     try {
         const { id } = req.params
@@ -114,6 +230,50 @@ const findOneById = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/books/{id}:
+ *   put:
+ *     summary: Actualizar un libro
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del libro
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               isbn:
+ *                 type: string
+ *               qr_code:
+ *                 type: string
+ *               shelf:
+ *                 type: string
+ *               available:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Libro actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       404:
+ *         description: Libro no encontrado
+ *       409:
+ *         description: ISBN o código QR ya existe
+ */
 const update = async (req, res) => {
     try {
         const { id } = req.params
@@ -172,6 +332,29 @@ const update = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/books/{id}:
+ *   delete:
+ *     summary: Eliminar un libro
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del libro
+ *     responses:
+ *       200:
+ *         description: Libro eliminado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       404:
+ *         description: Libro no encontrado
+ */
 const remove = async (req, res) => {
     try {
         const { id } = req.params
@@ -199,6 +382,42 @@ const remove = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/books/{id}/availability:
+ *   patch:
+ *     summary: Actualizar disponibilidad de un libro
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del libro
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - available
+ *             properties:
+ *               available:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Disponibilidad actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       400:
+ *         description: Campo available es requerido
+ *       404:
+ *         description: Libro no encontrado
+ */
 const updateAvailability = async (req, res) => {
     try {
         const { id } = req.params

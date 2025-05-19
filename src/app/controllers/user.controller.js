@@ -3,6 +3,53 @@ import 'dotenv/config';
 import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
+/**
+ * @swagger
+ * /api/users/register:
+ *   post:
+ *     summary: Registrar un nuevo usuario
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       201:
+ *         description: Usuario creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                 msg:
+ *                   type: object
+ *                   properties:
+ *                     token:
+ *                       type: string
+ *                     role_id:
+ *                       type: integer
+ *       400:
+ *         description: Campos requeridos faltantes
+ *       409:
+ *         description: El email ya existe
+ */
 const register = async (req, res) => {
     try {
         const { username, email, password } = req.body
@@ -43,6 +90,40 @@ const register = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: Iniciar sesión
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Login exitoso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       401:
+ *         description: Contraseña incorrecta
+ *       404:
+ *         description: Usuario no encontrado
+ */
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
@@ -84,12 +165,31 @@ const login = async (req, res) => {
     }
 }
 
-
-
-
-
-
-
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Obtener todos los usuarios
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                 msg:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *       401:
+ *         description: No autorizado
+ */
 const findAll = async (req, res) => {
     try {
         const users = await UserModel.findAll()
